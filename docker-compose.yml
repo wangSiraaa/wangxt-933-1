@@ -3,27 +3,32 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: rental-deposit-backend
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: deposit-refund-backend
     ports:
-      - "5000:5000"
-    environment:
-      - DATABASE_URL=sqlite:////app/data/rental_deposit.db
+      - "3000:3000"
     volumes:
-      - backend_data:/app/data
+      - ./backend/data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: rental-deposit-frontend
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: deposit-refund-frontend
     ports:
-      - "8080:80"
+      - "5173:5173"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  backend_data:
