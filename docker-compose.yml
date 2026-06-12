@@ -32,3 +32,17 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
+  smoke-test:
+    image: node:18-alpine
+    container_name: deposit-refund-smoke
+    working_dir: /app
+    volumes:
+      - ./scripts/smoke.js:/app/smoke.js:ro
+    environment:
+      - BASE_URL=http://backend:3000
+    depends_on:
+      backend:
+        condition: service_healthy
+    command: ["node", "smoke.js"]
+    restart: "no"
